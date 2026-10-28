@@ -34,14 +34,15 @@ export class BrandSocialAdapter implements ScraperAdapter {
     for (const item of rawPayload) {
       if (!item || typeof item !== 'object') continue;
       const post = item as Record<string, unknown>;
+      if (post.error_message) continue;
 
-      const postId = String(post.post_id || post.id || post.video_id || '');
+      const postId = String(post.post_id || post.id || post.video_id || post.postId || '');
       const platformEntityId = postId || `${this.platform}-${Date.now()}`;
       const rawTitle = String(post.title || post.caption || post.text || `${target.brand} ${this.platform} Post`);
       const rawContentTh = String(post.caption || post.text || post.description || rawTitle);
-      const sourceUrl = String(post.post_url || post.url || post.link || target.seed_url);
+      const sourceUrl = String(post.post_url || post.url || post.link || post.postUrl || target.seed_url);
 
-      const rawPublishedAt = post.created_time || post.published_at || post.date || post.timestamp;
+      const rawPublishedAt = post.created_time || post.published_at || post.date || post.timestamp || post.datePosted;
       const publishedAt = rawPublishedAt
         ? convertBuddhistYearToGregorian(String(rawPublishedAt).split('T')[0])
         : null;
@@ -50,6 +51,7 @@ export class BrandSocialAdapter implements ScraperAdapter {
       let reviewCount: number | null = null;
       if (typeof post.comments_count === 'number') reviewCount = post.comments_count;
       else if (typeof post.comments === 'number') reviewCount = post.comments;
+      else if (typeof post.numComments === 'number') reviewCount = post.numComments;
 
       observations.push({
         platform: this.platform,
@@ -62,7 +64,7 @@ export class BrandSocialAdapter implements ScraperAdapter {
         raw_content_th: rawContentTh,
         published_at: publishedAt,
         captured_at: capturedAt,
-        seller_name: String(post.author || `${target.brand} Thailand Official`),
+        seller_name: String(post.author || post.authorName || `${target.brand} Thailand Official`),
         is_official_store: true,
         review_count: reviewCount,
         activity_type: 'Social Post',
