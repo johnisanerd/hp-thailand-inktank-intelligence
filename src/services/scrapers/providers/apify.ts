@@ -71,10 +71,10 @@ export const APIFY_ACTOR_MAP: Record<string, { actorId: string; defaultInput: (t
     }),
   },
   'src-linkedin-th': {
-    actorId: 'apify/linkedin-post-search-scraper',
+    actorId: 'johnvc/linkedin-posts-api',
     defaultInput: (targetUrl) => ({
-      urls: [targetUrl],
-      limit: 20,
+      profileUrls: [targetUrl],
+      maxPostsPerProfile: 20,
     }),
   },
 };
@@ -193,10 +193,10 @@ export class ApifyProvider implements ScraperProvider {
       attempts++;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for actor run
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout for actor run
 
         // Run actor synchronously and fetch dataset items directly
-        const runUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(actorConfig.actorId)}/run-sync-get-dataset-items?timeout=55`;
+        const runUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(actorConfig.actorId)}/run-sync-get-dataset-items?timeout=115`;
         const res = await fetch(runUrl, {
           method: 'POST',
           headers: {
